@@ -146,7 +146,7 @@ function SignInForm() {
 
       <div className="mt-4 text-center">
         <Link href="/" className="text-blue-600">
-          Don't have an account? <span className="hover:underline">Register</span>
+          {"Don't have an account?"} <span className="hover:underline">Register</span>
         </Link>
       </div>
     </div>

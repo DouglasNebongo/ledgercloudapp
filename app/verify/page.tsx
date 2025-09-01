@@ -44,7 +44,7 @@ function VerifyForm() {
 
   return (
     <>
-      <p className="mb-4">We've sent a 6-digit code to {email}</p>
+      <p className="mb-4">{"We've sent a 6-digit code to {email}"}</p>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
