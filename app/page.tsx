@@ -1,95 +1,55 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import AcmeLogo from '@/app/ui/acme-logo';
+import { lusitana } from '@/app/ui/fonts';
+import Image from 'next/image';
+import SignUp from '@/app/auth/signup/page';
+import Link from 'next/link';
 
-export default function Home() {
+export default function Page() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
+    <main className="flex min-h-screen flex-col p-6 relative overflow-hidden">
+      {/* Background Image */}
+      <div className="fixed inset-0 -z-10">
         <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+          src="/static/city.png"
+          fill
+          className="object-cover"
+          alt="Background"
         />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+      </div>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+      {/* Blurred Overlay */}
+      <div className="fixed inset-0 -z-10 bg-black/50 backdrop-blur-sm"></div>
+
+      {/* Logo */}
+      <Link href='/'>
+        <div className="shrink-0 items-end rounded-lg p-4">
+          <AcmeLogo />
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </Link>
+
+      {/* Content Section */}
+      <div className={`${lusitana.className} flex flex-col md:flex-row flex-1 gap-8 mt-8 md:mt-0`}>
+        {/* Left Section - Welcome Message */}
+        <div className="flex-1 z-10 flex flex-col justify-center items-center p-8">
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-4 text-center">
+            Welcome to <span className="text-blue-600">Ledger</span>
+          </h1>
+          <p className="text-lg md:text-2xl text-white text-center max-w-md mb-6">
+            Streamline your work and grow your business with ease.
+          </p>
+          <p className="text-lg md:text-2xl text-white text-center max-w-md">
+            Ledger is designed to help you manage clients, track invoices, and analyze earnings. All in one place.
+          </p>
+        </div>
+
+        {/* Vertical Divider (Hidden on Mobile) */}
+        <div className="hidden md:block w-px bg-gray-200"></div>
+
+        {/* Right Section - Sign Up */}
+        <div className="flex-1 flex justify-center items-center p-8">
+          <SignUp />
+        </div>
+      </div>
+    </main>
   );
 }
