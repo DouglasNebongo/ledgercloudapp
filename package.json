@@ -4,10 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "vercel-build": "if [ \"$SKIP_DB_MIGRATIONS\" = \"true\" ]; then npm run build-only; else npm run db-deploy && npm run build-only; fi",
+    "db-deploy": "prisma generate && prisma migrate deploy",
+    "build-only": "next build --turbopack",
+    "build": "next build --turbopack"
+  
   },
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
