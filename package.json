@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "vercel-build": "if [ \"$SKIP_DB_MIGRATIONS\" = \"true\" ]; then npm run build-only; else npm run db-deploy && npm run build-only; fi",
+    "vercel-build": "npx prisma generate && if [ \"$SKIP_DB_MIGRATIONS\" = \"true\" ]; then npm run build-only; else npm run db-deploy && npm run build-only; fi",
     "db-deploy": "prisma generate && prisma migrate deploy",
     "build-only": "next build --turbopack",
     "build": "next build --turbopack"
