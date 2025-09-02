@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+export const runtime = 'edge';
+
 const requestCounts = new Map<string, { count: number; timestamp: number }>();
 
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 min
@@ -64,7 +66,11 @@ export function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch (err) {
-    console.error('Middleware error:', err);
+    if (err instanceof Error) {
+      console.error('Middleware error stack:', err.stack);
+    } else {
+      console.error('Middleware error (non-Error):', err);
+    }
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
