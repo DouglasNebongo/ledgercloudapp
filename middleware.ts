@@ -1,77 +1,59 @@
-// middleware.ts
 import { NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 import type { NextRequest } from 'next/server';
 
+const requestCounts = new Map<string, { count: number, timestamp: number }>();
 
-const requestCounts = new Map<string, { count: number; timestamp: number }>();
+//rate limit config
+const RATE_LIMIT_WINDOW: number = 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS: number = 100;
 
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 min
-const RATE_LIMIT_MAX_REQUESTS = 100;
+export async function middleware(request: NextRequest) {
+  const token = await getToken({ req: request });
+  const { pathname } = request.nextUrl;
 
-// helper that looks for common NextAuth cookie names
-function hasNextAuthSession(req: NextRequest): boolean {
-  // cookie names vary depending on your NextAuth config & secure settings
-  const candidates = [
-    'next-auth.session-token',
-    '__Secure-next-auth.session-token',
-    // If you're using jwt-based session cookie name you might have:
-    'next-auth.callback-url',
-    'next-auth.csrf-token',
-  ];
+  const ip: string = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
 
-  for (const name of candidates) {
-    const c = req.cookies.get(name);
-    if (c && c.value) return true;
-  }
-  return false;
-}
+  //rate limit
 
-export function middleware(request: NextRequest) {
-  try {
-    const { pathname } = request.nextUrl;
+  const currentTime: number = Date.now();
+  const userKey: string = token?.sub || ip;
 
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ?? 'unknown';
-    const userKey = ip; // fallback; you can use a cookie-identified user id if available
+  if(!requestCounts.has(userKey)){
+     requestCounts.set(userKey, { count: 1, timestamp: currentTime });
+  } else {
+     const userRequestData = requestCounts.get(userKey);
 
-    // rate limit
-    const now = Date.now();
-    const existing = requestCounts.get(userKey);
-    if (!existing) {
-      requestCounts.set(userKey, { count: 1, timestamp: now });
-    } else {
-      if (now - existing.timestamp > RATE_LIMIT_WINDOW) {
-        existing.count = 1;
-        existing.timestamp = now;
+     if(userRequestData) {
+
+      if((currentTime - userRequestData.timestamp) > RATE_LIMIT_WINDOW){
+        userRequestData.count = 1;
+        userRequestData.timestamp = currentTime;
       } else {
-        existing.count += 1;
-        if (existing.count > RATE_LIMIT_MAX_REQUESTS) {
-          return new NextResponse('Too many requests. Please try again later.', { status: 429 });
-        }
+          userRequestData.count += 1;
+
+          if(userRequestData.count > RATE_LIMIT_MAX_REQUESTS){
+            return new NextResponse('Too many requests. Please try again later.', {
+              status: 429,
+            });
+          }
       }
-      requestCounts.set(userKey, existing);
-    }
 
-    const hasSession = hasNextAuthSession(request);
-
-    // redirect unauthenticated users away from protected routes
-    if (!hasSession && (pathname.startsWith('/dashboard') || pathname.startsWith('/customers/create'))) {
-      return NextResponse.redirect(new URL('/auth/signin', request.url));
-    }
-
-    // redirect authenticated users away from auth routes
-    if (hasSession && (pathname === '/' || pathname.startsWith('/auth'))) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-
-    return NextResponse.next();
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error('Middleware error stack:', err.stack);
-    } else {
-      console.error('Middleware error (non-Error):', err);
-    }
-    return new NextResponse('Internal Server Error', { status: 500 });
+      requestCounts.set(userKey, userRequestData);
+     }
   }
+
+  // redirect unauthenticated users away from protected routes
+  if (!token && (pathname.startsWith('/dashboard') || pathname.startsWith('/customers/create'))) {
+    return NextResponse.redirect(new URL('/auth/signin', request.url));
+  }
+
+  // redirect authenticated users away from auth-related routes
+  if (token && (pathname === '/' || pathname.startsWith('/auth'))) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
