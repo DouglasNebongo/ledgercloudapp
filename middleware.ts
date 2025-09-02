@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import type { NextRequest } from 'next/server';
+export const runtime = 'nodejs';
 
 const requestCounts = new Map<string, { count: number, timestamp: number }>();
 
